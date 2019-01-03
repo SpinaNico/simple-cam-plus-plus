@@ -7,6 +7,15 @@
       html, body, video { height: 100%; width: 100%; margin: 0; background-color: #000; }
       video { display: block; }
 
+      html, body{
+        overflow: hidden;
+      }
+      
+
+    </style>
+    
+    <!-- tools styles-->
+    <style>
       .tools{
         width: 100%;
         height: 100%;
@@ -24,37 +33,149 @@
         transition-duration: 0.3s;
         background-color: rgba(0,0,0,0.5);
       }
-      
-
     </style>
-    
+
+
+    <!-- btn style -->
+    <style>
+    .btn{
+        background-color: rgba(0,0,0,0.7);
+        width: 50px;
+        height: 50px;
+        margin:0px;
+        border:0px;
+        border-radius: 19px;
+        outline: none;
+        box-shadow: 0px 0px 10px rgba(8, 131, 166, 0.3);
+        transition-duration: 0.3s;
+      }
+      .btn:hover{
+        background-color: rgba(0,0,0,0.5);
+        box-shadow: 0px 0px 25px rgba(8, 131, 166, 0.9);
+        transition-duration: 0.3s;
+      }
+
+      .btn-rotate{
+        position: absolute;
+        top:100%;
+        margin-top: 20px;
+        left:50%;
+        margin-left:-25px;
+        opacity: 0;
+        transition-duration: 0.5s;
+      }
+      .tools:hover .btn-rotate{ 
+        margin-top: -60px; 
+        transition-duration: 0.8s;
+        opacity: 1;
+        }
+      .btn-rotate svg{
+        width: 80%;
+        height: 80%;
+      }
+    </style>
+
+    <!-- style select box -->
+    <style>
+    </style>
+
+    <!-- rotation camera  state--> 
+    <style>
+      .camera{transition-duration: 1.2s;}
+      .camera-rotate-0{transform: rotate(0deg); }
+      .camera-rotate-1{transform: rotate(90deg); }
+      .camera-rotate-2{transform: rotate(180deg); }
+      .camera-rotate-3{transform: rotate(270deg); }
+    </style>
+
   </head>
   <body>
     <div class="tools">
-
+      
       <div class="bottom-tools">
-        <select id="list_cam">
+          <button class="btn-rotate btn">
+                            
+                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" width="512px" height="512px" viewBox="0 0 481.95 481.95" style="enable-background:new 0 0 481.95 481.95;" xml:space="preserve">
+                <g>
+                  <g id="rotate-right">
+                    <path d="M331.5,114.75L216.75,0v79.05C117.3,91.8,38.25,175.95,38.25,280.5s79.05,188.7,178.5,201.45v-51    C145.35,418.2,89.25,357,89.25,280.5s56.1-137.7,127.5-150.45v99.45L331.5,114.75z M443.7,255    c-5.101-35.7-17.851-68.85-40.8-99.45l-35.7,35.7c12.75,20.4,22.95,40.8,25.5,63.75H443.7z M267.75,430.95v51    c35.7-5.101,68.85-17.851,99.45-40.8l-35.7-35.7C311.1,418.2,290.7,428.4,267.75,430.95z M367.2,369.75l35.7,35.7    c22.949-30.601,38.25-63.75,40.8-99.45h-51C390.15,328.95,379.95,349.35,367.2,369.75z" fill="#FFFFFF"/>
+                  </g>
+                </g>
+                <g>
+                </g>
+                <g>
+                </g>
+                <g>
+                </g>
+                <g>
+                </g>
+                <g>
+                </g>
+                <g>
+                </g>
+                <g>
+                </g>
+                <g>
+                </g>
+                <g>
+                </g>
+                <g>
+                </g>
+                <g>
+                </g>
+                <g>
+                </g>
+                <g>
+                </g>
+                <g>
+                </g>
+                <g>
+                </g>
+                </svg>
+
+          </button>
+
+        <div id="list_cam">
           
-        </select>
+        </div>
 
       </div>
 
     </div>
-    <video id="cam" autoplay></video>
+    <video id="cam" class="camera camera-rotate-0" autoplay></video>
   </body>
 
   <foot>
     <script type="text/javascript">
 
+      //for controll rotation camera.
+      let rotateState = 0;
+      document.querySelector(".btn-rotate").addEventListener('click', ()=>{
+        document.querySelector(".camera").classList.remove(`camera-rotate-${rotateState}`);
+        if(rotateState == 3 ){
+          rotateState = 0
+        } else {
+          rotateState = rotateState+1;
+        }
+        console.log(rotateState)
+        document.querySelector(".camera").classList.add(`camera-rotate-${rotateState}`);
+      })  
+
+      /** search all webcams */
       navigator.mediaDevices.enumerateDevices().then((v)=>{
        
         for(const i of v){
           if(i.kind == 'videoinput')
           {
             // creation select box for different webcams
-            const option = document.createElement('option',{})
-            option.value ="ciao"
-            option.text = i.label
+            const option = document.createElement('button',{})
+            option.value =i.deviceId
+            console.log(i)
+            option.textContent = i.label
+            option.addEventListener('click', ()=>{
+              
+              document.querySelector('#cam').src = i.stream
+            })
             const q = document.querySelector("#list_cam").appendChild(option);//.append(`<option value="0">${i.label}</option>`)
           }
         }
@@ -63,6 +184,7 @@
       navigator.webkitGetUserMedia(
         {video : true}, 
         function(stream) {
+          console.log(stream)
           document.getElementById('cam').src = URL.createObjectURL(stream);
         }, 
         function() {
