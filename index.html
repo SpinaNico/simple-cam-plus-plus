@@ -81,11 +81,25 @@
 
     <!-- rotation camera  state--> 
     <style>
-      .camera{transition-duration: 1.2s;}
+      .camera{
+        transition-duration: 1.2s;  
+        z-index:2;
+        position: relative;
+        background-color: transparent;
+        }
       .camera-rotate-0{transform: rotate(0deg); }
       .camera-rotate-1{transform: rotate(90deg); }
       .camera-rotate-2{transform: rotate(180deg); }
       .camera-rotate-3{transform: rotate(270deg); }
+      .camera-background{
+        width:200%;
+        height: 200%;
+        position: absolute;
+        top:-50%;
+        left:-50%;
+        z-index:1;
+        filter:blur(13px);
+      }
     </style>
 
     <!-- List cams-->
@@ -105,9 +119,10 @@
         height: 30px;
         margin:auto;
         margin-top:-15px;
-        left:50%;
-        
-        
+        width:70%;
+        left:15%;
+        opacity: 0;
+        transform: translate(0px, 0px);
 
       }
       .list:hover{
@@ -115,8 +130,10 @@
         color:#fff;
         transition-duration: 0.3s;
       }
-      .list-cam{
-
+      .tools:hover .list{
+        opacity: 1;
+        transform: translate(14px, 0px);
+        transition-duration: 0.3s;
       }
     </style>
 
@@ -174,23 +191,26 @@
       </div>
 
     </div>
-    <video id="cam" class="camera camera-rotate-0" autoplay></video>
+    <video  class=" camera camera-rotate-0" autoplay></video>
+    <video  class="camera-background camera-rotate-0" autoplay></video>
   </body>
 
   <foot>
     <script type="text/javascript">
-
+      console.log(window.localStorage.getItem("ciao"))
+      console.log(window.localStorage.setItem("ciao", "come"))
       //for controll rotation camera.
       let rotateState = 0;
       document.querySelector(".btn-rotate").addEventListener('click', ()=>{
         document.querySelector(".camera").classList.remove(`camera-rotate-${rotateState}`);
+        document.querySelector(".camera-background").classList.remove(`camera-rotate-${rotateState}`);
         if(rotateState == 3 ){
           rotateState = 0
         } else {
           rotateState = rotateState+1;
         }
-        console.log(rotateState)
         document.querySelector(".camera").classList.add(`camera-rotate-${rotateState}`);
+        document.querySelector(".camera-background").classList.add(`camera-rotate-${rotateState}`);
       })  
 
 
@@ -209,20 +229,33 @@
         }}).catch(e=>alert(e));
 
         document.querySelector("#list_cam").onchange = (e)=>{
-          let data = e.target.value;
+            window.device = e.target.value;
+            settingVideoStream();
+        }
+
+        window.onscroll = ()=>{
+          settingVideoStream()
+        }
+        document.querySelector(".btn-rotate").addEventListener('click', ()=>{settingVideoStream()});
+  
+        function settingVideoStream(){
+
+          console.log(`
+            w: ${rotateState%2==0?window.innerWidth:window.innerHeight}
+            h: ${rotateState%2==0?window.innerHeight:window.innerWidth}
+          `)
           navigator.mediaDevices.getUserMedia({video:{
-            width: window.innerWidth,
-            height: window.innerHeight,
-            deviceId: {exact: data}
+            width: rotateState%2==0?window.innerWidth:window.innerHeight,
+            height: rotateState%2==0?window.innerHeight:window.innerWidth,
+            deviceId: {exact: window.device}
             }
           }).then(stream=> {
             document.querySelector(".camera").src = URL.createObjectURL(stream);
+            document.querySelector(".camera-background").src = URL.createObjectURL(stream);
           })
           .catch(e=>alert(e))
-         
         }
 
-  
 
    </script>
   </foot>
