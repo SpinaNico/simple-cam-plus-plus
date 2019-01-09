@@ -88,7 +88,39 @@
       .camera-rotate-3{transform: rotate(270deg); }
     </style>
 
-  </head>
+    <!-- List cams-->
+    <style>
+      .list{
+        margin:auto;
+        position: absolute;
+        padding:4px;
+        border-radius: 0px;
+        background-color: #444;
+        color:#aaa;
+        border-radius: 5px;
+        border:1px solid #333;  
+        outline:none;
+        transition-duration: 0.3s;
+        top:50%;
+        height: 30px;
+        margin:auto;
+        margin-top:-15px;
+        left:50%;
+        
+        
+
+      }
+      .list:hover{
+        background-color: #222;
+        color:#fff;
+        transition-duration: 0.3s;
+      }
+      .list-cam{
+
+      }
+    </style>
+
+</head>
   <body>
     <div class="tools">
       
@@ -135,9 +167,9 @@
 
           </button>
 
-        <div id="list_cam">
-          
-        </div>
+          <select class="list list-cam" id="list_cam">
+
+          </select>
 
       </div>
 
@@ -161,55 +193,36 @@
         document.querySelector(".camera").classList.add(`camera-rotate-${rotateState}`);
       })  
 
+
+
       /** search all webcams */
       navigator.mediaDevices.enumerateDevices().then((v)=>{
-        console.log(v)
         for(const i of v){
           if(i.kind == 'videoinput')
           {
-           
             // creation select box for different webcams
-            const option = document.createElement('button',{})
-           
-            option.value =JSON.stringify({devide:i.deviceId, group:i.groupId})
+            const option = document.createElement('option',{})
+            option.value =i.deviceId
             option.textContent = i.label
-            option.addEventListener('click', (elm)=>{
-
-              console.log(navigator.mediaDevices.getSupportedConstraints())
-              const data = JSON.parse(elm.target.value);
-              navigator.mediaDevices.getUserMedia({video:true, deviceId:data.device, groupId: data.group}).then(function(stream,s){
-                console.log(stream.s)
-                document.getElementById('cam').src = URL.createObjectURL(stream);
-              }).catch( e => {
-                alert('could not connect to stream', e)
-              })
-             document.querySelector('#cam').src = ""
-            })
             const q = document.querySelector("#list_cam").appendChild(option);//.append(`<option value="0">${i.label}</option>`)
           }
-        }
-      });
-        //const con = navigator.mediaDevices.getSupportedConstraints();
-        navigator.mediaDevices.getUserMedia({video:true, deviceId:"b4baa0b114ec3b11b85efe5a6325081595978b32f0a14267ddd760ae8b6713e6"}).then(function(stream){
-          console.log(stream)
-          document.getElementById('cam').src = URL.createObjectURL(stream);
-        }).catch( e => {
-          alert('could not connect to stream', e)
-        })
+        }}).catch(e=>alert(e));
 
-          // const con = navigator.mediaDevices.getSupportedConstraints();
-          // navigator.mediaDevices.enumerateDevices().then( v => v[0].getUserMedia(con, function(v) { console.log(v)});
-          // .then( stream => {
-          //               console.log(stream)
-          //               document.getElementById('cam').src = URL.createObjectURL(stream);
-          //             })
-          // .catch(() => {
-          //               alert('could not connect to stream')
-          //             }
-          //           );
-   
-     
-      //gui.Window.get().show();
+        document.querySelector("#list_cam").onchange = (e)=>{
+          let data = e.target.value;
+          navigator.mediaDevices.getUserMedia({video:{
+            width: window.innerWidth,
+            height: window.innerHeight,
+            deviceId: {exact: data}
+            }
+          }).then(stream=> {
+            document.querySelector(".camera").src = URL.createObjectURL(stream);
+          })
+          .catch(e=>alert(e))
+         
+        }
+
+  
 
    </script>
   </foot>
