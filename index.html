@@ -99,6 +99,7 @@
         left:-50%;
         z-index:1;
         filter:blur(13px);
+        -webkit-app-region: drag;
       }
     </style>
 
@@ -142,6 +143,9 @@
     <div class="tools">
       
       <div class="bottom-tools">
+
+       
+
           <button class="btn-rotate btn">
                             
                 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" width="512px" height="512px" viewBox="0 0 481.95 481.95" style="enable-background:new 0 0 481.95 481.95;" xml:space="preserve">
@@ -197,56 +201,70 @@
 
   <foot>
     <script type="text/javascript">
-      console.log(window.localStorage.getItem("ciao"))
-      console.log(window.localStorage.setItem("ciao", "come"))
-      //for controll rotation camera.
-      let rotateState = 0;
-      document.querySelector(".btn-rotate").addEventListener('click', ()=>{
-        document.querySelector(".camera").classList.remove(`camera-rotate-${rotateState}`);
-        document.querySelector(".camera-background").classList.remove(`camera-rotate-${rotateState}`);
-        if(rotateState == 3 ){
-          rotateState = 0
-        } else {
-          rotateState = rotateState+1;
+
+      
+      class StateCamera{
+
+        constructor(state){
+          if(state !== undefined)
+          this.state = this.setState(state)
+          else
+          this.loadState()
+
+          console.log(this.state)
         }
-        document.querySelector(".camera").classList.add(`camera-rotate-${rotateState}`);
-        document.querySelector(".camera-background").classList.add(`camera-rotate-${rotateState}`);
-      })  
 
+        getState(){
+          return this.state
+        }
 
-
-      /** search all webcams */
-      navigator.mediaDevices.enumerateDevices().then((v)=>{
-        for(const i of v){
-          if(i.kind == 'videoinput')
-          {
-            // creation select box for different webcams
-            const option = document.createElement('option',{})
-            option.value =i.deviceId
-            option.textContent = i.label
-            const q = document.querySelector("#list_cam").appendChild(option);//.append(`<option value="0">${i.label}</option>`)
+        setState(state){
+          if(state <=3){
+            this.state = parseInt(state)
           }
-        }}).catch(e=>alert(e));
+          else{
+            throw "State overflow value, value of state included 0 - 3 "
 
-        document.querySelector("#list_cam").onchange = (e)=>{
-            window.device = e.target.value;
-            settingVideoStream();
+          }
+          }
+
+        incrementState(){
+          console.log(this.state)
+          if(this.state < 3){
+            this.state = parseInt(this.state )+1
+          } else {
+            this.state = 0
+          }
+          this.saveState()
         }
 
-        window.onscroll = ()=>{
-          settingVideoStream()
+        saveState(){
+          window.localStorage.setItem('rotate', this.state);
         }
-        document.querySelector(".btn-rotate").addEventListener('click', ()=>{settingVideoStream()});
-  
-        function settingVideoStream(){
 
-          console.log(`
-            w: ${rotateState%2==0?window.innerWidth:window.innerHeight}
-            h: ${rotateState%2==0?window.innerHeight:window.innerWidth}
-          `)
+        loadState(){
+          if(window.localStorage.getItem('rotate') !== null){
+          this.state = parseInt(window.localStorage.getItem('rotate'));
+          } else {
+            this.state = 0;
+          }
+        }
+
+      }
+
+      function changeHTMLCameraState(preState, state) {
+        document.querySelector(".camera").classList.remove(`camera-rotate-${preState}`);
+        document.querySelector(".camera-background").classList.remove(`camera-rotate-${preState}`);
+
+        document.querySelector(".camera").classList.add(`camera-rotate-${state}`);
+        document.querySelector(".camera-background").classList.add(`camera-rotate-${state}`);
+      }
+      
+
+      function settingVideoStream(camera_state){
           navigator.mediaDevices.getUserMedia({video:{
-            width: rotateState%2==0?window.innerWidth:window.innerHeight,
-            height: rotateState%2==0?window.innerHeight:window.innerWidth,
+            width: camera_state.getState()%2==0?window.innerWidth:window.innerHeight,
+            height: camera_state.getState()%2==0?window.innerHeight:window.innerWidth,
             deviceId: {exact: window.device}
             }
           }).then(stream=> {
@@ -255,6 +273,48 @@
           })
           .catch(e=>alert(e))
         }
+
+      // Global Camera DIV
+      
+      const stateCamera = new StateCamera()
+      changeHTMLCameraState(0, stateCamera.getState())
+
+      /** search all webcams */
+      navigator.mediaDevices.enumerateDevices().then((v)=>{
+
+        for(const i of v){
+          if(i.kind == 'videoinput')
+          {
+            // creation select box for different webcams
+            const option = document.createElement('option',{})
+            option.value =i.deviceId
+            option.textContent = i.label
+            const q = document.querySelector("#list_cam").appendChild(option);
+          }
+        }
+        if(window.localStorage.getItem('device') !== null){
+          window.device = window.localStorage.getItem('device')
+          settingVideoStream(stateCamera);
+        }
+      }).catch(e=>alert(e));
+
+        document.querySelector("#list_cam").onchange = (e)=>{
+            window.device = e.target.value;
+            window.localStorage.setItem("device", window.device);
+            settingVideoStream(stateCamera);
+        }
+
+        window.onscroll = ()=>{settingVideoStream(stateCamera)}
+        document.querySelector(".btn-rotate").addEventListener('click', ()=>{
+          let statePre = stateCamera.getState();
+          stateCamera.incrementState()
+           let state = stateCamera.getState();
+          console.log(statePre, state)
+          changeHTMLCameraState(statePre, state)
+          settingVideoStream(stateCamera)
+        });
+  
+        
 
 
    </script>
