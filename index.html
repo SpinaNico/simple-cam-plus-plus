@@ -31,7 +31,7 @@
       }
       .tools:hover{
         transition-duration: 0.3s;
-        background-color: rgba(0,0,0,0.5);
+        background-color: rgba(0,0,0,0.3);
       }
     </style>
 
@@ -73,6 +73,10 @@
         width: 80%;
         height: 80%;
       }
+
+      .tools:hover .extra-animation-rotate{
+        opacity:1;
+      }
     </style>
 
     <!-- style select box -->
@@ -95,8 +99,10 @@
         width:200%;
         height: 200%;
         position: absolute;
-        top:-50%;
-        left:-50%;
+        top:50%;
+        left:50%;
+        margin-left:-100%;
+        margin-top:-100%;
         z-index:1;
         filter:blur(13px);
         -webkit-app-region: drag;
@@ -136,6 +142,116 @@
         transform: translate(14px, 0px);
         transition-duration: 0.3s;
       }
+
+      .extra-animation-rotate{
+        width:30px; height: 30px;
+        position: absolute;
+        top: 100%; left:100%;
+        margin-left: -30px;
+        margin-top: -30px;
+        border-top-left-radius: 50%;
+        outline:none;
+        background-color: #222;
+        border:1px solid #111;
+        box-shadow: -5px -5px 10px rgba(255,255,255,0.2);
+        transition-duration: 0.3s;
+        opacity: 0;
+      }
+      .extra-animation-rotate:hover{
+        transition-duration: 0.3s;
+        box-shadow: -7px -7px 10px rgba(21, 210, 244, 0.3);
+        width: 100px;
+        height: 100px;
+        margin-left: -100px;
+        margin-top: -100px;
+        
+      }
+
+      
+
+    
+      
+
+      .container-for-animation{
+        position: relative;
+        width: 70%;
+        margin:18%;
+        height: 70%;
+      
+      }
+      .container-for-animation div{
+        position: absolute;
+      }
+      .sqaure-container-black{ z-index: 2; width:70%; height: 70%; margin:15%;}
+      .sqaure-container-white{z-index: 1; width:100%; height: 100%;}
+      .camera-effect.sqaure-container-black{ 
+        animation-delay: 1.4s;
+        animation-duration: 2.2s;
+        animation-name: child-rotate;
+        animation-iteration-count: 1;
+      }
+      .camera-effect.sqaure-container-white{
+        animation-delay: 1.4s;
+        animation-duration: 2s;
+        animation-name: warp-rotate;
+        animation-iteration-count: 1;
+       }
+
+
+      .extra-animation-rotate:hover .sqaure-container-black{
+        animation-delay: 0.4s;
+        animation-duration: 1.2s;
+        animation-name: child-rotate;
+        animation-iteration-count: 1;
+        
+       }
+       .extra-animation-rotate:hover .sqaure-container-white{
+        animation-delay: 0.4s;
+        animation-duration: 2.7s;
+        animation-name: warp-rotate;
+        animation-iteration-count: 1;
+      }
+
+
+
+      @keyframes warp-rotate{
+        0%{
+          transform: rotate(-359deg) scale(3.6);
+        }
+
+        80%{
+          transform: rotate(50deg) scale(1);
+        }
+        100%{
+          transform: rotate(0deg) scale(1);
+        }
+      }
+
+      @keyframes child-rotate{
+        0%{
+          transform: rotate(359deg) scale(0.1);
+        }
+        80%{
+          transform: rotate(-285deg) scale(1.4);
+        }
+        100%{
+          transform: rotate(0deg) scale(1);
+        }
+      }
+
+
+      .extra-animation-rotate .sqaure-container-white{
+        background-color: #fff;
+        animation-iteration-count: 1;
+
+        
+      }
+      .extra-animation-rotate .sqaure-container-black{
+        background-color: #000;
+        animation-iteration-count: 1;
+        
+      }
+
     </style>
 
 </head>
@@ -192,11 +308,21 @@
 
           </select>
 
+          <button class="extra-animation-rotate">
+
+            <div class="container-for-animation">
+
+              <div class="sqaure-container-white"></div>
+              <div class="sqaure-container-black"></div>
+            </div>
+
+          </button>
+
       </div>
 
     </div>
-    <video  class=" camera camera-rotate-0" autoplay></video>
-    <video  class="camera-background camera-rotate-0" autoplay></video>
+    <video  class=" camera camera-rotate-0 camera-effect" autoplay></video>
+    <video  class="camera-background camera-rotate-0 camera-effect" autoplay></video>
   </body>
 
   <foot>
@@ -260,7 +386,6 @@
         document.querySelector(".camera-background").classList.add(`camera-rotate-${state}`);
       }
       
-
       function settingVideoStream(camera_state){
           navigator.mediaDevices.getUserMedia({video:{
             width: camera_state.getState()%2==0?window.innerWidth:window.innerHeight,
@@ -318,5 +443,27 @@
 
 
    </script>
+
+
+  <script>
+
+    let btn = document.querySelector(".extra-animation-rotate")
+    btn.addEventListener('click', () => {
+      let camera = document.querySelector('.camera');
+      let cameraBackground = document.querySelector('.camera-background');
+
+      camera.classList.add("sqaure-container-black")
+      cameraBackground.classList.add("sqaure-container-white")
+      setTimeout(()=>{
+        camera.classList.remove("sqaure-container-black")
+        cameraBackground.classList.remove("sqaure-container-white")
+      }, 3000)
+      
+    })
+
+   
+
+  </script>
+
   </foot>
 </html>
